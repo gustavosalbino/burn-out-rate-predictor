@@ -1,6 +1,6 @@
 #=====
 #=== Programa de analise do nivel de esgotamento em determinadas empresas
-#=== Am�byle Heck
+#=== Am?byle Heck
 #=== Gustavo Schmitz Albino
 #=== Jackson Denner
 #=====
@@ -130,7 +130,7 @@ ggplot(data=dados_replace, aes(x=replace_mean_resource,y=replace_mean_burn_rate 
   labs(x = 'Resource Allocation (Daily work hours)', y = 'Burn Rate') +
   theme_minimal()
 
-# Parametros de kurtosis e skewness ap�s ajuste pela media
+# Parametros de kurtosis e skewness ap?s ajuste pela media
 kurtosis(dados_replace$replace_mean_burn_rate)
 skewness(dados_replace$replace_mean_burn_rate)
 
@@ -192,7 +192,7 @@ ggplot(data=dados_sem_na, aes(x=Resource.Allocation,y=Burn.Rate ))+
   labs(x = 'Resource Allocation (Daily work hours)', y = 'Burn Rate') +
   theme_minimal()
 
-# Parametros de kurtosis e skewness ap�s ajuste pela media
+# Parametros de kurtosis e skewness ap?s ajuste pela media
 kurtosis(dados_sem_na$Burn.Rate)
 skewness(dados_sem_na$Burn.Rate)
 
@@ -262,138 +262,3 @@ ggplot(data = modelo_sem_na) +
 
 # Teste de Shapiro-Wilk
 shapiro.test(rstandard(modelo_sem_na))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#=====
-#=== Empresa
-#=====
-
-# Leitura dos dados
-dados <- read.table("<PATH>/empresa.txt", # modificar o caminho
-                    stringsAsFactors = T, # strings são fatores
-                    header=T) # primeira linha do arquivo são os rótulos das variáveis
-head(dados) # imprimir início do data frame
-
-library(ggplot2)
-# Gráficos 2 a 2 das variáveis em estudo (cada variável explicativa versus variável resposta)
-ggplot(data=dados, aes(x=entregas,y=tempo))+
-  geom_point() +
-  labs(x = 'Número de entrega', y = 'Tempo') +
-  theme_minimal()
-
-ggplot(data=dados, aes(x=distancia,y=tempo))+
-  geom_point()+
-  labs(x = 'Distância', y = 'Tempo') +
-  theme_minimal()
-
-ggplot(data=dados, aes(x=local,y=tempo))+
-  geom_boxplot() +
-  labs(x = 'Local', y = 'Tempo') +
-  theme_minimal()
-
-# Cálculo do coeficiente de correlação entre a variável resposta e as variáveis não categóricas
-cor(dados$entregas, dados$tempo)
-cor(dados$distancia, dados$tempo)
-
-# Ajuste do modelo de regressão linear múltipla
-modelo <- lm(tempo ~ entregas+distancia+local, # após o '~' adicionamos todas as variáveis explicativas separadas por '+'
-             data=dados) # nome do objeto onde encontram-se as variáveis
-summary(modelo) # imprimir o resumo do ajuste do modelo
-
-# Ajuste do modelo de regressão SEM a variável local (não significativa)
-modelo2 <- lm(tempo ~ entregas+distancia, 
-              data=dados) 
-summary(modelo2)
-
-# Análise de resíduos
-# Valores preditos versus Resíduos padronizados
-ggplot(data = modelo2) + 
-  geom_point(aes(x=.fitted, y=.stdresid)) +
-  geom_hline(yintercept = 0) +
-  labs(x = 'Valores preditos', y = 'Resíduos padronizados') +
-  theme_minimal()
-
-# Variável explicativa 1 (entregas) versus Resíduos padronizados
-ggplot(data = modelo2) + 
-  geom_point(aes(x=entregas, y=.stdresid)) +
-  geom_hline(yintercept = 0) +
-  labs(x = 'Entregas', y = 'Resíduos padronizados') + 
-  theme_minimal()
-
-# Variável explicativa 2 (distância) versus Resíduos padronizados
-ggplot(data = modelo2) + 
-  geom_point(aes(x=distancia, y=.stdresid)) +
-  geom_hline(yintercept = 0) +
-  labs(x = 'Distância', y = 'Resíduos padronizados') + 
-  theme_minimal()
-
-# Gráfico de probabilidade normal
-ggplot(data = modelo2, aes(sample = .stdresid)) +
-  stat_qq() +
-  stat_qq_line() +
-  labs(x = 'Valores esperados pela normal', y = 'Resíduos padronizados') +
-  theme_minimal()
-
-# Histograma dos Resíduos padronizados
-ggplot(data = modelo2) + 
-  geom_histogram(aes(x = .stdresid), 
-                 bins = 5, 
-                 fill = 'lightgrey',
-                 colour = 'black') +
-  labs(x = 'Resíduos padronizados', y = 'Frequência') +
-  theme_minimal()
-
-# Teste de Shapiro-Wilk
-shapiro.test(rstandard(modelo2))
-
-
-#=====
-#=== nlschools
-#=====
-library(MASS)
-data(nlschools)
-?nlschools
-
-# Ajuste do modelo nulo (sem variáveis explicativas)
-m0 <- lm(lang~1, # '~1' indica que não consideramos nenhuma variável explicativa
-         data=nlschools) # nome do objeto onde encontram-se as variáveis
-
-# Procedimento forward de seleção de variáveis
-m1 <- step(m0, # m0 indica o modelo nulo
-           list(lower=~1, # criamos uma lista: em lower indicamos o modelo nulo
-                upper=~IQ+GS+SES+COMB), # em upper o modelo saturado (com todas as variáveis possíveis do modelo)
-           direction="forward") # indica o método forward
-m1
-
-# Procedimento stepwise de seleção de variáveis
-m2 <- step(m0, # m0 indica o modelo nulo
-           list(lower=~1, # criamos uma lista: em lower indicamos o modelo nulo
-                upper=~IQ+GS+SES+COMB), # em upper o modelo saturado (com todas as variáveis possíveis do modelo)
-           direction="both") # indica o método stepwise
-m2
-
-# ajuste do modelo saturado (considerando todas as variáveis explicativas)
-m3 <- lm(lang~IQ+GS+SES+COMB, data=nlschools)
-
-# Procedimento backward de seleção de variáveis
-m4 <- step(m3, # m3 indica o modelo saturado
-           list(lower=~1, # criamos uma lista: em lower indicamos o modelo nulo
-                upper=~IQ+GS+SES+COMB), # em upper o modelo saturado (com todas as variáveis possíveis do modelo) 
-           direction="backward") # indica o método backward
-m4
